@@ -26,6 +26,20 @@ class Model:
         :return: lista di tuple --> (nome dell'impianto, media), es. (Impianto A, 123)
         """
         # TODO
+        impianto_e_media = []
+        lista_media = []
+        media_consumi = 0
+        for impianto in self._impianti:
+            consumi = impianto.get_consumi()
+            for consumo in consumi:
+                if consumo.data.month == mese:
+                    lista_media.append(consumo.kwh)
+                    if len(lista_media) > 0:
+                        media_consumi = sum(lista_media) / len(lista_media)
+                    else:
+                        media_consumi = 0
+            impianto_e_media.append((impianto.nome, media_consumi))
+        return impianto_e_media
 
     def get_sequenza_ottima(self, mese:int):
         """
@@ -47,6 +61,18 @@ class Model:
     def __ricorsione(self, sequenza_parziale, giorno, ultimo_impianto, costo_corrente, consumi_settimana):
         """ Implementa la ricorsione """
         # TODO
+        if len(sequenza_parziale) == 7:
+            if self.__costo_ottimo == -1 or costo_corrente < self.__costo_ottimo:
+                self.__costo_ottimo = costo_corrente
+                self.__sequenza_ottima = sequenza_parziale
+            return
+
+        for impianto in self._impianti:
+            costo_spostamento = 5 if ultimo_impianto and impianto.id != ultimo_impianto else 0
+            costo_variabile = consumi_settimana[impianto.id][giorno - 1]
+            nuovo_costo = costo_corrente + costo_spostamento + costo_variabile
+
+            self.__ricorsione(sequenza_parziale + [impianto.id], giorno + 1, impianto.id, nuovo_costo, consumi_settimana)
 
     def __get_consumi_prima_settimana_mese(self, mese: int):
         """
@@ -54,4 +80,18 @@ class Model:
         :return: un dizionario: {id_impianto: [kwh_giorno1, ..., kwh_giorno7]}
         """
         # TODO
+        id_e_consumi = {}
+        for impianto in self._impianti:
+            lista_consumi = [0]*7
+            consumi_tot = impianto.get_consumi()
+            for consumi in consumi_tot:
+                if consumi.data.month == mese and consumi.data.day <= 7:
+                    giorno = consumi.data.day - 1    #indice
+                    lista_consumi[giorno] = consumi.kwh
+            id_e_consumi[impianto.id] = lista_consumi
+
+        return id_e_consumi
+
+
+
 
