@@ -27,17 +27,17 @@ class Model:
         """
         # TODO
         impianto_e_media = []
-        lista_media = []
-        media_consumi = 0
         for impianto in self._impianti:
+            lista_media = []
+            media_consumi = 0
             consumi = impianto.get_consumi()
             for consumo in consumi:
                 if consumo.data.month == mese:
                     lista_media.append(consumo.kwh)
-                    if len(lista_media) > 0:
-                        media_consumi = sum(lista_media) / len(lista_media)
-                    else:
-                        media_consumi = 0
+                if len(lista_media) > 0:
+                    media_consumi = sum(lista_media) / len(lista_media)
+                else:
+                    media_consumi = 0
             impianto_e_media.append((impianto.nome, media_consumi))
         return impianto_e_media
 
